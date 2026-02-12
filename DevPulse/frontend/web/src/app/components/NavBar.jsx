@@ -13,7 +13,8 @@ import { usePathname } from "next/navigation";
 
 export default function NavBar() {
   const { isLoaded, user } = useUser();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false); // avatar/account dropdown
+  const [mobileOpen, setMobileOpen] = useState(false); // hamburger mobile nav
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const pathname = usePathname();
 
@@ -24,7 +25,8 @@ export default function NavBar() {
   const [notifOpen, setNotifOpen] = useState(false);
 
   const notifRef = useRef();
-  const menuRef = useRef();
+  const profileRef = useRef();
+  const mobileRef = useRef();
 
   // helper: fetch notifications
   async function fetchNotifications() {
@@ -78,8 +80,11 @@ export default function NavBar() {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setNotifOpen(false);
       }
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+      if (mobileRef.current && !mobileRef.current.contains(e.target)) {
+        setMobileOpen(false);
       }
     }
     document.addEventListener("mousedown", onDocClick);
@@ -91,11 +96,11 @@ export default function NavBar() {
   const avatarUrl = user?.profileImageUrl || user?.imageUrl || "/default-avatar.png";
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
-  // --- GALLERY REMOVED HERE ---
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/explore", label: "Explore" },
     { href: "/feed", label: "Feed" },
+    { href: "/media", label: "Media" },
   ];
 
   const isActive = (href) => {
@@ -138,10 +143,14 @@ export default function NavBar() {
           {/* Right Section: Actions */}
           <div className="flex items-center gap-3">
             
+            {/* FIX 2: Changed 'hidden sm:flex' to 'hidden md:flex'. 
+                This ensures the Dashboard button only appears in the top bar when the hamburger menu is hidden,
+                preventing it from appearing twice on smaller screens.
+            */}
             {pathname !== "/dashboard" && (
               <Link
                 href="/dashboard"
-                className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-white/5 active:scale-95"
+                className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-white/5 active:scale-95"
               >
                 <LayoutDashboard size={15} className="text-indigo-400" />
                 Dashboard
@@ -220,11 +229,16 @@ export default function NavBar() {
               )}
             </div>
 
-            {/* Profile Menu */}
-            <div className="relative" ref={menuRef}>
+            {/* Profile Menu (avatar) */}
+            <div className="relative" ref={profileRef}>
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={() => {
+                  setProfileOpen((s) => !s);
+                  setMobileOpen(false); 
+                }}
                 className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-white/10 transition-all border border-white/10"
+                aria-expanded={profileOpen}
+                aria-label="Account menu"
               >
                 <img
                   src={avatarUrl}
@@ -233,24 +247,24 @@ export default function NavBar() {
                 />
               </button>
 
-              {menuOpen && (
+              {profileOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-2 border-b border-white/5 mb-1">
                     <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Account</p>
                     <p className="text-sm font-semibold truncate text-white">{user?.fullName || user?.username}</p>
                   </div>
                   
-                  <Link href={`/u/${user?.username ?? user?.id}`} className="flex items-center px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setMenuOpen(false)}>
+                  <Link href={`/u/${user?.username ?? user?.id}`} className="flex items-center px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setProfileOpen(false)}>
                     View Profile
                   </Link>
 
-                  <Link href="/settings" className="flex items-center px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setMenuOpen(false)}>
+                  <Link href="/settings" className="flex items-center px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors" onClick={() => setProfileOpen(false)}>
                     Settings
                   </Link>
 
                   <button
                     className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors"
-                    onClick={() => { setAvatarModalOpen(true); setMenuOpen(false); }}
+                    onClick={() => { setAvatarModalOpen(true); setProfileOpen(false); }}
                   >
                     Change Picture
                   </button>
@@ -266,9 +280,53 @@ export default function NavBar() {
               )}
             </div>
 
-            <button className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors">
-              <Menu size={20} />
-            </button>
+            {/* Mobile hamburger */}
+            <div className="relative md:hidden" ref={mobileRef}>
+              <button
+                aria-label="Open site menu"
+                aria-expanded={mobileOpen}
+                onClick={() => {
+                  setMobileOpen((s) => !s);
+                  setProfileOpen(false); 
+                }}
+                className="p-2 text-zinc-400 hover:text-white transition-colors"
+              >
+                <Menu size={20} />
+              </button>
+
+              {mobileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden animate-in fade-in duration-200">
+                  <nav className="flex flex-col">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`px-4 py-2 text-sm ${isActive(item.href) ? "bg-white/10 text-white font-semibold" : "text-zinc-300 hover:bg-white/5 hover:text-white"} transition-colors`}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+
+                    {/* FIX 1: Removed the 'else' condition.
+                        The Dashboard link now only renders if the user is NOT on the dashboard page.
+                    */}
+                    {pathname !== "/dashboard" && (
+                      <div className="px-4 py-2 border-t border-white/5 mt-1">
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all"
+                        >
+                          <LayoutDashboard size={15} className="text-indigo-400" />
+                          Dashboard
+                        </Link>
+                      </div>
+                    )}
+                  </nav>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
