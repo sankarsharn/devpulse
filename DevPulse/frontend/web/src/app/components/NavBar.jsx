@@ -9,11 +9,6 @@ import { usePathname } from "next/navigation";
 
 /**
  * NavBar with Notifications and Action-based Dashboard button
- *
- * Changes:
- * - profileOpen: controls avatar/account dropdown only
- * - mobileOpen: controls hamburger/mobile nav only (contains navItems + dashboard)
- * - profileRef & mobileRef separate so outside-click handling doesn't close the wrong menu
  */
 
 export default function NavBar() {
@@ -79,7 +74,7 @@ export default function NavBar() {
     }
   }
 
-  // click outside to close dropdowns (separate refs)
+  // click outside to close dropdowns
   useEffect(() => {
     function onDocClick(e) {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -101,7 +96,6 @@ export default function NavBar() {
   const avatarUrl = user?.profileImageUrl || user?.imageUrl || "/default-avatar.png";
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
-  // --- GALLERY REMOVED HERE ---
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/explore", label: "Explore" },
@@ -149,10 +143,14 @@ export default function NavBar() {
           {/* Right Section: Actions */}
           <div className="flex items-center gap-3">
             
+            {/* FIX 2: Changed 'hidden sm:flex' to 'hidden md:flex'. 
+                This ensures the Dashboard button only appears in the top bar when the hamburger menu is hidden,
+                preventing it from appearing twice on smaller screens.
+            */}
             {pathname !== "/dashboard" && (
               <Link
                 href="/dashboard"
-                className="hidden sm:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-white/5 active:scale-95"
+                className="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-white/5 active:scale-95"
               >
                 <LayoutDashboard size={15} className="text-indigo-400" />
                 Dashboard
@@ -236,7 +234,7 @@ export default function NavBar() {
               <button
                 onClick={() => {
                   setProfileOpen((s) => !s);
-                  setMobileOpen(false); // ensure mobile nav closed if profile opens
+                  setMobileOpen(false); 
                 }}
                 className="flex items-center gap-2 rounded-full p-0.5 hover:ring-2 hover:ring-white/10 transition-all border border-white/10"
                 aria-expanded={profileOpen}
@@ -282,21 +280,20 @@ export default function NavBar() {
               )}
             </div>
 
-            {/* Mobile hamburger - only toggles mobile nav (site nav + dashboard) */}
+            {/* Mobile hamburger */}
             <div className="relative md:hidden" ref={mobileRef}>
               <button
                 aria-label="Open site menu"
                 aria-expanded={mobileOpen}
                 onClick={() => {
                   setMobileOpen((s) => !s);
-                  setProfileOpen(false); // ensure profile closed when mobile opens
+                  setProfileOpen(false); 
                 }}
                 className="p-2 text-zinc-400 hover:text-white transition-colors"
               >
                 <Menu size={20} />
               </button>
 
-              {/* Mobile nav - only navItems + dashboard (no profile links) */}
               {mobileOpen && (
                 <div className="absolute right-0 top-full mt-2 w-64 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl py-2 overflow-hidden animate-in fade-in duration-200">
                   <nav className="flex flex-col">
@@ -305,26 +302,27 @@ export default function NavBar() {
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
-                        className={`px-4 py-2 text-sm ${isActive(item.href) ? activeCls : "text-zinc-300 hover:bg-white/5 hover:text-white"} transition-colors`}
+                        className={`px-4 py-2 text-sm ${isActive(item.href) ? "bg-white/10 text-white font-semibold" : "text-zinc-300 hover:bg-white/5 hover:text-white"} transition-colors`}
                       >
                         {item.label}
                       </Link>
                     ))}
 
-                    <div className="px-4 py-2 border-t border-white/5">
-                      {pathname !== "/dashboard" ? (
+                    {/* FIX 1: Removed the 'else' condition.
+                        The Dashboard link now only renders if the user is NOT on the dashboard page.
+                    */}
+                    {pathname !== "/dashboard" && (
+                      <div className="px-4 py-2 border-t border-white/5 mt-1">
                         <Link
                           href="/dashboard"
                           onClick={() => setMobileOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all"
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all"
                         >
                           <LayoutDashboard size={15} className="text-indigo-400" />
                           Dashboard
                         </Link>
-                      ) : (
-                        <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="text-zinc-300 text-sm">Dashboard</Link>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </nav>
                 </div>
               )}
