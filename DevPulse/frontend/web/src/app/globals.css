@@ -1,27 +1,104 @@
 @import "tailwindcss";
 
+/* --------------------------------------------------
+   1. VIBRANT LIGHT MODE (Default)
+   -------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Standard Tailwind Variables */
+  --background: #f8fafc;           /* Soft Slate-Blue */
+  --foreground: #0f172a;           /* Deep Navy */
+
+  /* DevPulse Custom Variables */
+  --bg-body: #f8fafc;
+  --hero-glow: radial-gradient(circle at top left, #e0e7ff 0%, #f8fafc 40%);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --dropdown-bg: #ffffff;
+  --nav-bg: rgba(248, 250, 252, 0.8);
+  --nav-text-active: #0f172a;
+  --nav-text-muted: #64748b;
+  --nav-active-bg: rgba(79, 70, 229, 0.1);
+  --nav-hover-bg: rgba(0, 0, 0, 0.03);
+  --nav-hover-bg-heavy: rgba(0, 0, 0, 0.06);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-muted: rgba(0, 0, 0, 0.04);
+  --modal-overlay: rgba(15, 23, 42, 0.3);
 }
 
+/* --------------------------------------------------
+   2. ORIGINAL DARK MODE
+   -------------------------------------------------- */
+/* We use .dark class because your Settings toggle adds/removes this class */
+.dark {
+  /* Standard Tailwind Variables */
+  --background: #0d0d0d;
+  --foreground: #ffffff;
+
+  /* DevPulse Custom Variables (Your original hex codes) */
+  --bg-body: #0d0d0d;
+  --hero-glow: radial-gradient(circle at top left, rgba(49, 46, 129, 0.4) 0%, #0d0d0d 40%);
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --dropdown-bg: #18181b;
+  --nav-bg: rgba(0, 0, 0, 0.6);
+  --nav-text-active: #ffffff;
+  --nav-text-muted: #a1a1aa;
+  --nav-active-bg: rgba(255, 255, 255, 0.1);
+  --nav-hover-bg: rgba(255, 255, 255, 0.05);
+  --nav-hover-bg-heavy: rgba(255, 255, 255, 0.15);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-muted: rgba(255, 255, 255, 0.05);
+  --modal-overlay: rgba(0, 0, 0, 0.8);
+}
+
+/* --------------------------------------------------
+   3. TAILWIND v4 THEME CONFIG
+   -------------------------------------------------- */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  
+  /* Fonts */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-mono-font-stack, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Custom Animations */
+  --animate-gradient-xy: gradient-xy 3s ease infinite;
+
+  @keyframes gradient-xy {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* --------------------------------------------------
+   4. BASE STYLES
+   -------------------------------------------------- */
+@layer base {
+  body {
+    background-color: var(--bg-body);
+    color: var(--nav-text-active);
+    font-family: var(--font-sans);
+    transition-property: background-color, color, border-color;
+    transition-duration: 300ms;
+    transition-timing-function: ease;
+  }
 
+  /* Smooth scroll for the whole app */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar for a "vibrant" feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--nav-text-muted);
+  }
+}

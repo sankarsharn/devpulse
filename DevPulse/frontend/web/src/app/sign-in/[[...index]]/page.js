@@ -5,18 +5,18 @@ import Link from "next/link";
 
 export default function SignInPage() {
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 py-12 overflow-hidden">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[var(--bg-body)] px-4 py-12 overflow-hidden transition-colors duration-300">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Gradient Orbs */}
-        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        {/* Gradient Orbs - Using brand variables for consistent glow */}
+        <div className="absolute top-1/4 -left-48 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-48 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         
         {/* Grid Pattern */}
         <svg className="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(99, 102, 241, 0.3)" strokeWidth="1"/>
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--border-color)" strokeWidth="1"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
@@ -25,66 +25,27 @@ export default function SignInPage() {
 
       {/* Content Container */}
       <div className="relative z-10 w-full max-w-md">
-        {/* Enhanced Pulse/Activity Logo with Animation */}
+        {/* Enhanced Pulse/Activity Logo */}
         <div className="mb-8 flex justify-center">
           <div className="relative group">
-            {/* Glow Effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
             
-            {/* Logo SVG - Activity/Pulse Design */}
             <svg
               width="140"
               height="140"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="relative text-indigo-400 transition-all duration-500 group-hover:scale-110 drop-shadow-2xl"
+              className="relative text-indigo-500 transition-all duration-500 group-hover:scale-110 drop-shadow-2xl"
             >
-              {/* Outer Ring with Pulse Animation */}
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                opacity="0.3"
-                className="animate-pulse"
-              />
-              
-              {/* Secondary Ring */}
-              <circle
-                cx="12"
-                cy="12"
-                r="8"
-                stroke="currentColor"
-                strokeWidth="0.3"
-                opacity="0.2"
-                className="animate-pulse"
-                style={{ animationDelay: '0.5s' }}
-              />
-              
-              {/* Heart Rate / Activity Line */}
-              <path
-                d="M3 12H6L9 3L15 21L18 12H21"
-                stroke="url(#pulseGradient)"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="drop-shadow-lg"
-              />
-              
-              {/* Animated Dots along the pulse */}
-              <circle cx="6" cy="12" r="1.5" fill="currentColor" opacity="0.6" className="animate-pulse" />
-              <circle cx="9" cy="3" r="1.5" fill="currentColor" opacity="0.8" className="animate-pulse" style={{ animationDelay: '0.3s' }} />
-              <circle cx="15" cy="21" r="1.5" fill="currentColor" opacity="0.8" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
-              <circle cx="18" cy="12" r="1.5" fill="currentColor" opacity="0.6" className="animate-pulse" style={{ animationDelay: '0.9s' }} />
-              
-              {/* Gradients */}
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="0.5" opacity="0.3" className="animate-pulse" />
+              <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="0.3" opacity="0.2" className="animate-pulse" style={{ animationDelay: '0.5s' }} />
+              <path d="M3 12H6L9 3L15 21L18 12H21" stroke="url(#pulseGradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg" />
               <defs>
                 <linearGradient id="pulseGradient" x1="3" y1="12" x2="21" y2="12">
-                  <stop offset="0%" stopColor="#818cf8" />
-                  <stop offset="50%" stopColor="#c084fc" />
-                  <stop offset="100%" stopColor="#818cf8" />
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="50%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#6366f1" />
                 </linearGradient>
               </defs>
             </svg>
@@ -93,144 +54,93 @@ export default function SignInPage() {
 
         {/* Header Section */}
         <div className="text-center mb-10">
-          <h1 className="text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-tight sm:text-6xl mb-4 drop-shadow-lg">
+          <h1 className="text-5xl font-black bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent tracking-tight sm:text-6xl mb-4 drop-shadow-lg">
             Welcome Back
           </h1>
           <div className="relative">
-            <p className="text-lg text-gray-300 max-w-md mx-auto leading-relaxed">
+            <p className="text-lg text-[var(--nav-text-muted)] max-w-md mx-auto leading-relaxed">
               Ready to keep the momentum going?
             </p>
-            <p className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mt-2">
+            <p className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent mt-2">
               Check your Pulse and manage your projects.
             </p>
           </div>
           
           {/* Status Icons */}
           <div className="flex justify-center gap-8 mt-8">
-            <div className="group flex flex-col items-center">
-              <div className="w-12 h-12 rounded-xl bg-gray-800/50 border border-gray-700 flex items-center justify-center group-hover:border-indigo-500 transition-all duration-300 group-hover:scale-110">
-                <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            {[
+              { color: "text-indigo-500", label: "Active", path: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
+              { color: "text-purple-500", label: "Growing", path: "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" },
+              { color: "text-pink-500", label: "Connected", path: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" }
+            ].map((item, idx) => (
+              <div key={idx} className="group flex flex-col items-center">
+                <div className="w-12 h-12 rounded-xl bg-[var(--nav-hover-bg)] border border-[var(--border-muted)] flex items-center justify-center group-hover:border-indigo-500 transition-all duration-300 group-hover:scale-110">
+                  <svg className={`w-6 h-6 ${item.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.path} />
+                  </svg>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--nav-text-muted)] mt-2 group-hover:text-[var(--nav-text-active)] transition-colors font-bold">{item.label}</span>
               </div>
-              <span className="text-xs text-gray-500 mt-2 group-hover:text-gray-300 transition-colors">Active</span>
-            </div>
-            
-            <div className="group flex flex-col items-center">
-              <div className="w-12 h-12 rounded-xl bg-gray-800/50 border border-gray-700 flex items-center justify-center group-hover:border-purple-500 transition-all duration-300 group-hover:scale-110">
-                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <span className="text-xs text-gray-500 mt-2 group-hover:text-gray-300 transition-colors">Growing</span>
-            </div>
-            
-            <div className="group flex flex-col items-center">
-              <div className="w-12 h-12 rounded-xl bg-gray-800/50 border border-gray-700 flex items-center justify-center group-hover:border-pink-500 transition-all duration-300 group-hover:scale-110">
-                <svg className="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <span className="text-xs text-gray-500 mt-2 group-hover:text-gray-300 transition-colors">Connected</span>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Clerk SignIn Component with Enhanced Container */}
+        {/* Clerk SignIn Component */}
         <div className="relative group">
-          {/* Animated Border Gradient */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl blur-lg opacity-30 group-hover:opacity-50 transition duration-1000 animate-gradient-xy"></div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl blur-lg opacity-20 group-hover:opacity-40 transition duration-1000 animate-gradient-xy"></div>
           
-          {/* Glass Card Container */}
-          <div className="relative bg-gray-950/60 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-6 shadow-2xl">
+          <div className="relative bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl">
             <SignIn
               path="/sign-in"
               signUpUrl="/sign-up"
               forceRedirectUrl="/dashboard"
               appearance={{
                 elements: {
-                  card: "bg-gray-950 shadow-none border-0 rounded-2xl p-8",
+                  card: "bg-transparent shadow-none border-0 rounded-2xl p-8",
                   rootBox: "w-full",
                   formButtonPrimary: 
-                    "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-sm font-semibold normal-case shadow-lg transition-all active:scale-95 border-0 py-3",
-                  footerActionLink: "text-indigo-400 hover:text-indigo-300 font-semibold transition-colors",
+                    "bg-indigo-600 hover:bg-indigo-700 text-sm font-bold normal-case shadow-lg transition-all active:scale-95 border-0 py-3",
+                  footerActionLink: "text-indigo-600 hover:text-indigo-500 font-bold transition-colors",
                   formFieldInput: 
-                    "bg-gray-900 border-gray-800 text-gray-100 focus:border-indigo-500 focus:ring-indigo-500/50 rounded-xl py-3",
-                  formFieldLabel: "text-gray-300 font-medium mb-2",
-                  identityPreviewText: "text-gray-300",
-                  identityPreviewEditButton: "text-indigo-400 hover:text-indigo-300",
-                  formHeaderTitle: "text-gray-100 text-2xl font-bold mb-2",
-                  formHeaderSubtitle: "text-gray-400 mb-6",
+                    "bg-[var(--nav-hover-bg)] border-[var(--border-muted)] text-[var(--nav-text-active)] focus:border-indigo-500 rounded-xl py-3",
+                  formFieldLabel: "text-[var(--nav-text-active)] font-bold mb-2",
+                  identityPreviewText: "text-[var(--nav-text-active)]",
+                  formHeaderTitle: "text-[var(--nav-text-active)] text-2xl font-black mb-2",
+                  formHeaderSubtitle: "text-[var(--nav-text-muted)] mb-6",
                   socialButtonsBlockButton: 
-                    "bg-gray-900 border-gray-800 text-gray-100 hover:bg-gray-800 transition-all py-3 rounded-xl",
-                  socialButtonsBlockButtonText: "text-gray-100 font-medium",
-                  dividerLine: "bg-gray-800",
-                  dividerText: "text-gray-500",
-                  formFieldInputShowPasswordButton: "text-gray-400 hover:text-gray-300",
-                  footer: "bg-transparent mt-6",
-                  footerActionText: "text-gray-400",
-                  footerAction: "mt-4",
-                  footerPages: "mt-4",
-                  footerPagesLink: "text-indigo-400 hover:text-indigo-300",
+                    "bg-[var(--nav-hover-bg)] border-[var(--border-muted)] text-[var(--nav-text-active)] hover:bg-[var(--nav-hover-bg-heavy)] transition-all py-3 rounded-xl",
+                  socialButtonsBlockButtonText: "text-[var(--nav-text-active)] font-bold",
+                  dividerLine: "bg-[var(--border-muted)]",
+                  dividerText: "text-[var(--nav-text-muted)]",
+                  footerActionText: "text-[var(--nav-text-muted)]",
                   headerTitle: "hidden",
                   headerSubtitle: "hidden",
-                  main: "gap-6",
-                },
-                layout: {
-                  socialButtonsPlacement: "top",
-                  socialButtonsVariant: "blockButton",
                 },
               }}
             />
           </div>
         </div>
 
-        {/* Bottom Link with Icon */}
         <div className="mt-8 text-center">
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            <p className="text-gray-400">
+            <p className="text-[var(--nav-text-muted)] text-sm font-medium">
               New to the community?{" "}
               <Link 
                 href="/sign-up" 
-                className="font-bold text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text hover:from-indigo-300 hover:to-purple-300 transition-all duration-300 inline-flex items-center gap-1 group"
+                className="font-black text-indigo-600 hover:text-indigo-500 transition-all duration-300 inline-flex items-center gap-1 group"
               >
                 Create an account
-                <svg className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-indigo-600 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
             </p>
-          </div>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="mt-10 flex justify-center gap-6 opacity-50">
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs text-gray-500 font-medium">SSL Secured</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-            <span className="text-xs text-gray-500 font-medium">Protected</span>
-          </div>
         </div>
       </div>
 
       <style jsx>{`
         @keyframes gradient-xy {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
         }
         .animate-gradient-xy {
           background-size: 400% 400%;

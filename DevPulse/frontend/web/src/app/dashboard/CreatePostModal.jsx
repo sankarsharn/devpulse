@@ -80,25 +80,25 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" 
+        className="absolute inset-0 bg-[var(--modal-overlay)] backdrop-blur-sm transition-opacity" 
         onClick={uploading ? null : resetAndClose} 
       />
 
       {/* Modal Content */}
       <form 
         onSubmit={handleSubmit} 
-        className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        className="relative w-full max-w-2xl bg-[var(--dropdown-bg)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/2">
-          <h3 className="text-lg font-medium text-white flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-muted)] bg-[var(--nav-hover-bg)]">
+          <h3 className="text-lg font-medium text-[var(--nav-text-active)] flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
             Create Post
           </h3>
           <button 
             type="button"
             onClick={resetAndClose}
-            className="p-1 rounded-full hover:bg-white/10 text-zinc-400 transition"
+            className="p-1 rounded-full hover:bg-[var(--nav-hover-bg-heavy)] text-[var(--nav-text-muted)] transition"
           >
             <X size={20} />
           </button>
@@ -111,13 +111,13 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="What's on your mind? Share your project's progress..."
-              className="w-full min-h-[120px] bg-black/40 border border-white/8 rounded-xl p-4 text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-600/50 focus:border-purple-600/50 transition resize-none"
+              className="w-full min-h-[120px] bg-[var(--nav-bg)] border border-[var(--border-muted)] rounded-xl p-4 text-[var(--nav-text-active)] placeholder:text-[var(--nav-text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-600/50 focus:border-indigo-600/50 transition resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Preview Box */}
-            <div className="relative group aspect-video md:aspect-auto md:h-44 border-2 border-dashed border-white/10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden transition hover:border-white/20">
+            <div className="relative group aspect-video md:aspect-auto md:h-44 border-2 border-dashed border-[var(--border-muted)] rounded-xl bg-[var(--nav-hover-bg)] flex items-center justify-center overflow-hidden transition hover:border-[var(--border-color)]">
               {preview ? (
                 <>
                   {file?.type.startsWith("video/") ? (
@@ -133,7 +133,7 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
                   </button>
                 </>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-zinc-500">
+                <div className="flex flex-col items-center gap-2 text-[var(--nav-text-muted)]">
                   <ImageIcon size={32} strokeWidth={1.5} />
                   <span className="text-xs">No media selected</span>
                 </div>
@@ -142,13 +142,13 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
 
             {/* Upload Area */}
             <div className="flex flex-col justify-center space-y-3">
-              <label className="group relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-white/10 bg-white/3 cursor-pointer hover:bg-white/5 transition border-dashed hover:border-purple-500/50">
-                <div className="p-2 rounded-full bg-purple-600/10 text-purple-400 group-hover:scale-110 transition">
+              <label className="group relative flex flex-col items-center justify-center gap-3 p-4 rounded-xl border border-[var(--border-muted)] bg-[var(--nav-hover-bg)] cursor-pointer hover:bg-[var(--nav-hover-bg-heavy)] transition border-dashed hover:border-indigo-500/50">
+                <div className="p-2 rounded-full bg-indigo-600/10 text-indigo-500 group-hover:scale-110 transition">
                   <Upload size={20} />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-zinc-200">Click to upload</p>
-                  <p className="text-[11px] text-zinc-500 mt-1">Images or MP4 (Max 50MB)</p>
+                  <p className="text-sm font-medium text-[var(--nav-text-active)]">Click to upload</p>
+                  <p className="text-[11px] text-[var(--nav-text-muted)] mt-1">Images or MP4 (Max 50MB)</p>
                 </div>
                 <input
                   type="file"
@@ -169,11 +169,11 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-white/2 border-t border-white/5 flex justify-end gap-3">
+        <div className="px-6 py-4 bg-[var(--nav-hover-bg)] border-t border-[var(--border-muted)] flex justify-end gap-3">
           <button
             type="button"
             onClick={resetAndClose}
-            className="px-5 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition"
+            className="px-5 py-2 rounded-lg text-sm font-medium text-[var(--nav-text-muted)] hover:bg-[var(--nav-hover-bg-heavy)] hover:text-[var(--nav-text-active)] transition"
             disabled={uploading}
           >
             Cancel
@@ -182,7 +182,7 @@ export default function CreatePostModal({ open, onClose, onPosted }) {
           <button
             type="submit"
             disabled={uploading || (!text && !file)}
-            className="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold shadow-lg shadow-purple-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center gap-2"
+            className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center gap-2"
           >
             {uploading ? (
               <>
