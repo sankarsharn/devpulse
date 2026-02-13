@@ -1,33 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useUser, SignOutButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import CreatePostModal from "./CreatePostModal";
 import ProfileImageModal from "../components/ProfileImageModal";
-import { Github, Plus, Flame, LayoutGrid, Settings } from "lucide-react";
+import { Github, Plus, Flame } from "lucide-react";
 import RepoSection from "../components/RepoSection";
-
-/**
- * app/dashboard/page.jsx
- * Navbar removed (now lives in app/components/NavBar.jsx)
- * The layout should include NavBarClient so the navbar is visible site-wide except home.
- */
 
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
-  const [menuOpen, setMenuOpen] = useState(false);
-
   const [openCreate, setOpenCreate] = useState(false);
   const [openProfileImage, setOpenProfileImage] = useState(false);
-
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedRepo, setSelectedRepo] = useState(null);
-
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
-  // demo repos (temporary)
   const repos = [
     { id: 1, name: "portfolio-site", stars: 120, forks: 30 },
     { id: 2, name: "ai-assistant", stars: 350, forks: 80 },
@@ -36,25 +24,16 @@ export default function Dashboard() {
     { id: 5, name: "blog-platform", stars: 66, forks: 10 },
   ];
 
-  // redirect if not signed in (client-side protection)
-  // keep hooks order consistent
-  // (router is a hook so declare it before effects)
-  const { } = useUser(); // note: already called above, kept for clarity
-  // redirect effect must be after hooks
   useEffect(() => {
-    // guard: wait until Clerk loads, then if no user redirect
     if (isLoaded && !user) {
-      // use window.location.replace so back button behavior is clean
       window.location.replace("/");
     }
   }, [isLoaded, user]);
 
-  // fetch posts on mount
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  // wait for Clerk to initialize before rendering UI that depends on user
   if (!isLoaded || !user) return null;
 
   async function fetchPosts() {
@@ -75,41 +54,37 @@ export default function Dashboard() {
     }
   }
 
-  // callback when a new post is created
   function handlePosted(post) {
     setPosts((p) => [post, ...p]);
   }
 
-  const avatarUrl = user?.profileImageUrl || "/default-avatar.png";
-
   return (
-    <div className="min-h-screen text-white relative overflow-hidden">
+    <div className="min-h-screen text-[var(--nav-text-active)] relative overflow-hidden bg-[var(--bg-body)]">
       {/* ========== BACKGROUND GLOW ========== */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-pink-900/40 blur-3xl opacity-60 pointer-events-none" />
+      <div className="absolute inset-0 bg-[var(--hero-glow)] blur-3xl opacity-60 pointer-events-none" />
 
       {/* ========== MAIN CONTENT ========== */}
       <main className="relative z-10 max-w-7xl mx-auto px-10 py-12 space-y-14">
         {/* HERO */}
-        <section className="rounded-3xl p-10 bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl">
+        <section className="rounded-3xl p-10 bg-[var(--card-bg)] backdrop-blur-xl border border-[var(--border-color)] shadow-2xl">
           <div className="flex items-start justify-between gap-6">
             <div>
               <h2 className="text-4xl font-bold mb-3">
-                Code. Sync. <span className="text-purple-400">Showcase.</span>
+                Code. Sync. <span className="text-indigo-500">Showcase.</span>
               </h2>
-              <p className="text-zinc-400 mb-4">
+              <p className="text-[var(--nav-text-muted)] mb-4">
                 Connect GitHub and share your work with the community.
               </p>
 
               <div className="flex gap-4 flex-wrap">
-                <button className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-semibold hover:scale-105 transition">
+                <button className="flex items-center gap-2 px-6 py-3 bg-[var(--nav-text-active)] text-[var(--bg-body)] rounded-xl font-semibold hover:scale-105 transition shadow-lg">
                   <Github size={18} />
                   Connect GitHub
                 </button>
 
-                {/* hero-level Create Post button (keeps modal) */}
                 <button
                   onClick={() => setOpenCreate(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-purple-600 rounded-xl hover:bg-purple-700 transition text-white"
+                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 rounded-xl hover:bg-indigo-700 transition text-white shadow-lg shadow-indigo-500/20"
                 >
                   <Plus size={18} />
                   Create Post
@@ -117,8 +92,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* small stats / CTA area (optional) */}
-            <div className="hidden md:flex flex-col items-end text-sm text-zinc-400">
+            <div className="hidden md:flex flex-col items-end text-sm text-[var(--nav-text-muted)]">
               <div className="mb-2">10K+ Developers</div>
               <div className="mb-2">50K+ Projects</div>
               <div className="mb-2">1M+ Views</div>
@@ -131,49 +105,49 @@ export default function Dashboard() {
         {/* FEED SECTION */}
         <section>
           <div className="flex items-center gap-3 mb-6">
-            <Flame size={20} className="text-pink-400" />
-            <h3 className="text-2xl font-semibold">Community Feed</h3>
+            <Flame size={20} className="text-orange-500" />
+            <h3 className="text-2xl font-semibold text-[var(--nav-text-active)]">Community Feed</h3>
           </div>
 
           <div className="space-y-6">
             {loadingPosts ? (
-              <div className="text-zinc-400">Loading posts...</div>
+              <div className="text-[var(--nav-text-muted)]">Loading posts...</div>
             ) : posts.length === 0 ? (
-              <div className="text-zinc-400">No posts yet — be the first to post!</div>
+              <div className="text-[var(--nav-text-muted)]">No posts yet — be the first to post!</div>
             ) : (
               posts.map((p) => (
                 <article
                   key={p.id}
-                  className="rounded-2xl p-6 bg-white/5 border border-white/10 backdrop-blur-xl flex gap-6"
+                  className="rounded-2xl p-6 bg-[var(--card-bg)] border border-[var(--border-color)] backdrop-blur-xl flex gap-6"
                 >
                   {/* votes */}
-                  <div className="flex flex-col items-center text-zinc-400 min-w-[48px]">
-                    <button className="hover:text-white">▲</button>
+                  <div className="flex flex-col items-center text-[var(--nav-text-muted)] min-w-[48px]">
+                    <button className="hover:text-[var(--nav-text-active)]">▲</button>
                     <span className="font-semibold">{p.votes ?? 0}</span>
-                    <button className="hover:text-white">▼</button>
+                    <button className="hover:text-[var(--nav-text-active)]">▼</button>
                   </div>
 
                   {/* content */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs">
+                      <div className="w-8 h-8 rounded-full bg-[var(--nav-hover-bg)] flex items-center justify-center text-xs text-[var(--nav-text-active)] border border-[var(--border-muted)]">
                         {(p.username || "U")[0]?.toUpperCase()}
                       </div>
 
-                      <div className="text-sm text-zinc-300">
-                        <div className="font-semibold">{p.username ?? "Unknown"}</div>
-                        <div className="text-xs text-zinc-500">{new Date(p.createdAt).toLocaleString()}</div>
+                      <div className="text-sm">
+                        <div className="font-semibold text-[var(--nav-text-active)]">{p.username ?? "Unknown"}</div>
+                        <div className="text-xs text-[var(--nav-text-muted)]">{new Date(p.createdAt).toLocaleString()}</div>
                       </div>
                     </div>
 
-                    <p className="mb-3">{p.text}</p>
+                    <p className="mb-3 text-[var(--nav-text-active)]">{p.text}</p>
 
                     {p.mediaUrl && (
-                      <div className="mt-2">
+                      <div className="mt-2 border border-[var(--border-muted)] rounded-lg overflow-hidden">
                         {/\.(mp4|webm|ogg)$/i.test(p.mediaUrl) ? (
-                          <video src={p.mediaUrl} controls className="w-full max-h-[420px] rounded-lg" />
+                          <video src={p.mediaUrl} controls className="w-full max-h-[420px]" />
                         ) : (
-                          <img src={p.mediaUrl} alt="media" className="w-full rounded-lg" />
+                          <img src={p.mediaUrl} alt="media" className="w-full" />
                         )}
                       </div>
                     )}
@@ -185,52 +159,42 @@ export default function Dashboard() {
         </section>
       </main>
 
-      {/* ========== EDIT MODAL ========== */}
       <EditModal open={openEdit} repo={selectedRepo} onClose={() => setOpenEdit(false)} />
-
-      {/* ========== CREATE POST MODAL ========== */}
       <CreatePostModal open={openCreate} onClose={() => setOpenCreate(false)} onPosted={handlePosted} />
-
-      {/* ========== PROFILE IMAGE MODAL ========== */}
       <ProfileImageModal open={openProfileImage} onClose={() => setOpenProfileImage(false)} user={user} />
     </div>
   );
 }
 
-/* ================= EDIT MODAL ================= */
 function EditModal({ open, repo, onClose }) {
   if (!open || !repo) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50">
-      <div className="bg-zinc-900 border border-white/10 rounded-2xl p-8 w-[420px]">
-        <h3 className="text-xl font-semibold mb-6">Customize "{repo.name}"</h3>
+    <div className="fixed inset-0 bg-[var(--modal-overlay)] backdrop-blur-lg flex items-center justify-center z-50">
+      <div className="bg-[var(--dropdown-bg)] border border-[var(--border-color)] rounded-2xl p-8 w-[420px] shadow-2xl">
+        <h3 className="text-xl font-semibold mb-6 text-[var(--nav-text-active)]">Customize "{repo.name}"</h3>
 
-        <div className="space-y-4 text-sm">
-          <label className="flex justify-between">
-            Show stars <input type="checkbox" defaultChecked />
+        <div className="space-y-4 text-sm text-[var(--nav-text-muted)]">
+          <label className="flex justify-between items-center">
+            Show stars <input type="checkbox" defaultChecked className="accent-indigo-500" />
           </label>
-
-          <label className="flex justify-between">
-            Show forks <input type="checkbox" defaultChecked />
+          <label className="flex justify-between items-center">
+            Show forks <input type="checkbox" defaultChecked className="accent-indigo-500" />
           </label>
-
-          <label className="flex justify-between">
-            Show description <input type="checkbox" defaultChecked />
+          <label className="flex justify-between items-center">
+            Show description <input type="checkbox" defaultChecked className="accent-indigo-500" />
           </label>
-
-          <label className="flex justify-between">
-            Pin to top <input type="checkbox" />
+          <label className="flex justify-between items-center">
+            Pin to top <input type="checkbox" className="accent-indigo-500" />
           </label>
-
-          <label className="flex justify-between">
-            Hide repo <input type="checkbox" />
+          <label className="flex justify-between items-center">
+            Hide repo <input type="checkbox" className="accent-indigo-500" />
           </label>
         </div>
 
         <div className="flex justify-end gap-3 mt-8">
-          <button onClick={onClose} className="px-4 py-2 bg-white/10 rounded-lg">Cancel</button>
-          <button onClick={onClose} className="px-4 py-2 bg-purple-600 rounded-lg">Save</button>
+          <button onClick={onClose} className="px-4 py-2 bg-[var(--nav-hover-bg)] text-[var(--nav-text-active)] border border-[var(--border-muted)] rounded-lg transition-colors">Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Save</button>
         </div>
       </div>
     </div>

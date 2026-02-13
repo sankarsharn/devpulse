@@ -78,17 +78,17 @@ function timeAgo(ts) {
 function getIcon(type) {
   switch (type) {
     case "comment":
-      return <MessageSquare size={18} className="text-purple-400" />;
+      return <MessageSquare size={18} className="text-indigo-500" />;
     case "upvote":
-      return <ArrowUp size={18} className="text-green-400" />;
+      return <ArrowUp size={18} className="text-emerald-500" />;
     case "downvote":
-      return <ArrowDown size={18} className="text-red-400" />;
+      return <ArrowDown size={18} className="text-rose-500" />;
     case "follow":
-      return <UserPlus size={18} className="text-blue-400" />;
+      return <UserPlus size={18} className="text-sky-500" />;
     case "star":
-      return <Star size={18} className="text-yellow-400" />;
+      return <Star size={18} className="text-amber-500" />;
     default:
-      return <Bell size={18} className="text-zinc-400" />;
+      return <Bell size={18} className="text-[var(--nav-text-muted)]" />;
   }
 }
 
@@ -145,17 +145,20 @@ export default function NotificationsPage() {
   /* -------------------- UI -------------------- */
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0410] via-[#1c0420] to-[#140816] text-white py-12 px-6">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-[var(--bg-body)] text-[var(--nav-text-active)] py-12 px-6 relative overflow-hidden">
+      {/* Background Glow */}
+      <div className="absolute inset-0 bg-[var(--hero-glow)] blur-3xl opacity-20 pointer-events-none" />
+
+      <div className="max-w-3xl mx-auto relative z-10">
 
         {/* header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-extrabold">Notifications</h1>
+          <h1 className="text-2xl font-black tracking-tight text-[var(--nav-text-active)]">Notifications</h1>
 
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="px-4 py-2 rounded-md bg-gradient-to-r from-purple-600 to-pink-600 text-sm"
+              className="px-5 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
             >
               Mark all read
             </button>
@@ -163,9 +166,9 @@ export default function NotificationsPage() {
         </div>
 
         {/* list */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {sorted.length === 0 ? (
-            <div className="text-zinc-400 text-center py-20">
+            <div className="text-[var(--nav-text-muted)] text-center py-24 bg-[var(--card-bg)] rounded-3xl border border-dashed border-[var(--border-color)]">
               You're all caught up 🎉
             </div>
           ) : (
@@ -173,26 +176,28 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 className={`
-                  flex items-start gap-4 p-4 rounded-xl border
+                  flex items-start gap-5 p-5 rounded-2xl border transition-all duration-300
                   ${n.read
-                    ? "bg-white/3 border-white/6 opacity-70"
-                    : "bg-purple-900/20 border-purple-500/30"}
+                    ? "bg-[var(--card-bg)] border-[var(--border-muted)] opacity-70"
+                    : "bg-[var(--nav-active-bg)] border-indigo-500/30 shadow-sm"}
                 `}
               >
-                <div className="mt-1">{getIcon(n.type)}</div>
+                <div className="mt-1 p-2.5 rounded-xl bg-[var(--nav-hover-bg)] border border-[var(--border-muted)]">
+                  {getIcon(n.type)}
+                </div>
 
                 <div className="flex-1">
-                  <div className="text-sm">
-                    <span className="font-semibold text-white">{n.user}</span>{" "}
-                    <span className="text-zinc-300">{n.message}</span>
+                  <div className="text-sm leading-relaxed">
+                    <span className="font-bold text-[var(--nav-text-active)]">{n.user}</span>{" "}
+                    <span className="text-[var(--nav-text-active)] opacity-80">{n.message}</span>
                     {n.postTitle && (
-                      <span className="text-purple-400 ml-1">
+                      <span className="text-indigo-500 font-semibold ml-1">
                         “{n.postTitle}”
                       </span>
                     )}
                   </div>
 
-                  <div className="text-xs text-zinc-500 mt-1">
+                  <div className="text-xs text-[var(--nav-text-muted)] mt-1 font-medium">
                     {timeAgo(n.createdAt)} ago
                   </div>
                 </div>
@@ -200,10 +205,10 @@ export default function NotificationsPage() {
                 {!n.read && (
                   <button
                     onClick={() => markRead(n.id)}
-                    className="p-2 rounded-md hover:bg-white/5"
+                    className="p-2 rounded-xl text-[var(--nav-text-muted)] hover:bg-[var(--nav-hover-bg-heavy)] hover:text-[var(--nav-text-active)] transition-all"
                     title="Mark read"
                   >
-                    <Check size={16} />
+                    <Check size={18} />
                   </button>
                 )}
               </div>
