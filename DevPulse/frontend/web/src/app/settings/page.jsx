@@ -2,12 +2,12 @@
 
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
+import { useTheme } from "@/context/ThemeContext"; // Import the global theme hook
 import {
   User,
   Bell,
   Shield,
   Palette,
-  Globe,
   Trash2,
   Save,
   LogOut,
@@ -17,19 +17,20 @@ import {
 /* ==============================
    Local Storage Key
 ============================== */
-
 const STORAGE_KEY = "devpulse_settings_v1";
 
 /* ==============================
-   Helpers
+   Themed Helpers
 ============================== */
 
 function Section({ icon: Icon, title, children }) {
   return (
-    <section className="bg-white/[0.03] border border-white/10 rounded-2xl p-6 shadow-lg">
-      <div className="flex items-center gap-3 mb-6">
-        <Icon className="w-5 h-5 text-indigo-400" />
-        <h2 className="font-bold text-lg">{title}</h2>
+    <section className="bg-[var(--card-bg)] border border-[var(--border-color)] backdrop-blur-xl rounded-3xl p-8 shadow-xl">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+          <Icon className="w-5 h-5" />
+        </div>
+        <h2 className="font-black text-xl text-[var(--nav-text-active)]">{title}</h2>
       </div>
       {children}
     </section>
@@ -39,12 +40,12 @@ function Section({ icon: Icon, title, children }) {
 function Input({ label, ...props }) {
   return (
     <div className="space-y-2">
-      <label className="text-xs uppercase tracking-wider text-zinc-400 font-semibold">
+      <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--nav-text-muted)] font-black">
         {label}
       </label>
       <input
         {...props}
-        className="w-full rounded-xl px-4 py-3 bg-white/5 border border-white/10 focus:border-indigo-500 outline-none text-sm"
+        className="w-full rounded-2xl px-5 py-4 bg-[var(--nav-hover-bg)] border border-[var(--border-muted)] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm text-[var(--nav-text-active)] transition-all placeholder:opacity-50"
       />
     </div>
   );
@@ -52,16 +53,18 @@ function Input({ label, ...props }) {
 
 function Toggle({ label, value, onChange }) {
   return (
-    <div className="flex items-center justify-between py-3">
-      <span className="text-sm text-zinc-200">{label}</span>
+    <div className="flex items-center justify-between py-4 border-b border-[var(--border-muted)] last:border-0">
+      <span className="text-sm font-bold text-[var(--nav-text-active)] capitalize">
+        {label.replace(/([A-Z])/g, ' $1')}
+      </span>
       <button
         onClick={() => onChange(!value)}
-        className={`w-11 h-6 rounded-full transition relative ${
-          value ? "bg-indigo-600" : "bg-zinc-600"
+        className={`w-12 h-7 rounded-full transition-all relative shadow-inner ${
+          value ? "bg-indigo-600" : "bg-[var(--nav-hover-bg-heavy)]"
         }`}
       >
         <span
-          className={`absolute top-1 w-4 h-4 bg-white rounded-full transition ${
+          className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-md ${
             value ? "left-6" : "left-1"
           }`}
         />
@@ -76,30 +79,27 @@ function Toggle({ label, value, onChange }) {
 
 export default function SettingsPage() {
   const { user } = useUser();
+  const { isDarkMode, setIsDarkMode } = useTheme(); // Use global theme state
 
   const [settings, setSettings] = useState({
     displayName: "",
     bio: "",
     website: "",
-
     socials: {
       github: "",
       linkedin: "",
       twitter: "",
     },
-
     preferences: {
-      darkMode: true,
+      darkMode: isDarkMode, // Initialize from context
       autoplayVideos: true,
       showTrending: true,
     },
-
     notifications: {
       likes: true,
       comments: true,
       follows: true,
     },
-
     privacy: {
       privateProfile: false,
       hideEmail: true,
@@ -108,11 +108,26 @@ export default function SettingsPage() {
 
   const [saved, setSaved] = useState(false);
 
+  // Keep local settings in sync if theme is toggled from Navbar
+  useEffect(() => {
+    setSettings(prev => ({
+      ...prev,
+      preferences: { ...prev.preferences, darkMode: isDarkMode }
+    }));
+  }, [isDarkMode]);
+
   /* Load saved */
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) setSettings(JSON.parse(raw));
-  }, []);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      setSettings(parsed);
+      // Ensure global theme matches what was loaded from storage
+      if (parsed.preferences?.darkMode !== undefined) {
+        setIsDarkMode(parsed.preferences.darkMode);
+      }
+    }
+  }, [setIsDarkMode]);
 
   /* Save */
   const save = () => {
@@ -121,34 +136,30 @@ export default function SettingsPage() {
     setTimeout(() => setSaved(false), 1200);
   };
 
-  /* ==============================
-     UI
-  ============================== */
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#07040b] to-[#0f0410] text-white py-12">
-      <div className="max-w-5xl mx-auto px-4 space-y-8">
+    <main className="min-h-screen bg-[var(--bg-body)] text-[var(--nav-text-active)] py-12 relative overflow-hidden transition-colors duration-300">
+      <div className="absolute inset-0 bg-[var(--hero-glow)] blur-[120px] opacity-20 pointer-events-none" />
 
-        {/* Header */}
+      <div className="max-w-5xl mx-auto px-4 space-y-10 relative z-10">
         <header>
-          <h1 className="text-4xl font-black bg-gradient-to-r from-indigo-300 to-pink-400 bg-clip-text text-transparent">
-            Settings
+          <h1 className="text-4xl font-black text-[var(--nav-text-active)] tracking-tight">
+            Account Settings
           </h1>
-          <p className="text-zinc-400 mt-2">
-            Manage your profile, preferences and account.
+          <p className="text-[var(--nav-text-muted)] mt-1 font-medium">
+            Manage your profile, preferences and global theme.
           </p>
         </header>
 
         {/* ================= Profile ================= */}
         <Section icon={User} title="Profile">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-8">
             <Input
               label="Display Name"
               value={settings.displayName}
               onChange={(e) =>
                 setSettings({ ...settings, displayName: e.target.value })
               }
-              placeholder={user?.fullName}
+              placeholder={user?.fullName || "Your Name"}
             />
             <Input
               label="Website"
@@ -156,25 +167,27 @@ export default function SettingsPage() {
               onChange={(e) =>
                 setSettings({ ...settings, website: e.target.value })
               }
+              placeholder="https://portfolio.dev"
             />
           </div>
 
-          <div className="mt-6">
-            <label className="text-xs uppercase text-zinc-400">Bio</label>
+          <div className="mt-8">
+            <label className="text-[10px] uppercase tracking-[0.2em] text-[var(--nav-text-muted)] font-black">Bio</label>
             <textarea
-              rows={3}
-              className="w-full mt-2 rounded-xl px-4 py-3 bg-white/5 border border-white/10"
+              rows={4}
+              className="w-full mt-2 rounded-2xl px-5 py-4 bg-[var(--nav-hover-bg)] border border-[var(--border-muted)] text-sm text-[var(--nav-text-active)] focus:border-indigo-500 outline-none transition-all resize-none"
               value={settings.bio}
               onChange={(e) =>
                 setSettings({ ...settings, bio: e.target.value })
               }
+              placeholder="Tell your story..."
             />
           </div>
         </Section>
 
         {/* ================= Social Links ================= */}
         <Section icon={LinkIcon} title="Social Links">
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-6">
             {Object.keys(settings.socials).map((k) => (
               <Input
                 key={k}
@@ -189,93 +202,101 @@ export default function SettingsPage() {
                     },
                   })
                 }
+                placeholder={`@${k}_user`}
               />
             ))}
           </div>
         </Section>
 
         {/* ================= Preferences ================= */}
-        <Section icon={Palette} title="Preferences">
-          {Object.entries(settings.preferences).map(([k, v]) => (
-            <Toggle
-              key={k}
-              label={k}
-              value={v}
-              onChange={(val) =>
-                setSettings({
-                  ...settings,
-                  preferences: { ...settings.preferences, [k]: val },
-                })
-              }
-            />
-          ))}
+        <Section icon={Palette} title="Appearance">
+          <div className="space-y-1">
+            {Object.entries(settings.preferences).map(([k, v]) => (
+              <Toggle
+                key={k}
+                label={k}
+                value={v}
+                onChange={(val) => {
+                  setSettings({
+                    ...settings,
+                    preferences: { ...settings.preferences, [k]: val },
+                  });
+                  // Specifically update global theme if this is the darkMode toggle
+                  if (k === "darkMode") {
+                    setIsDarkMode(val);
+                  }
+                }}
+              />
+            ))}
+          </div>
         </Section>
 
         {/* ================= Notifications ================= */}
         <Section icon={Bell} title="Notifications">
-          {Object.entries(settings.notifications).map(([k, v]) => (
-            <Toggle
-              key={k}
-              label={`Notify on ${k}`}
-              value={v}
-              onChange={(val) =>
-                setSettings({
-                  ...settings,
-                  notifications: { ...settings.notifications, [k]: val },
-                })
-              }
-            />
-          ))}
+          <div className="space-y-1">
+            {Object.entries(settings.notifications).map(([k, v]) => (
+              <Toggle
+                key={k}
+                label={`Notify on ${k}`}
+                value={v}
+                onChange={(val) =>
+                  setSettings({
+                    ...settings,
+                    notifications: { ...settings.notifications, [k]: val },
+                  })
+                }
+              />
+            ))}
+          </div>
         </Section>
 
         {/* ================= Privacy ================= */}
         <Section icon={Shield} title="Privacy">
-          {Object.entries(settings.privacy).map(([k, v]) => (
-            <Toggle
-              key={k}
-              label={k}
-              value={v}
-              onChange={(val) =>
-                setSettings({
-                  ...settings,
-                  privacy: { ...settings.privacy, [k]: val },
-                })
-              }
-            />
-          ))}
+          <div className="space-y-1">
+            {Object.entries(settings.privacy).map(([k, v]) => (
+              <Toggle
+                key={k}
+                label={k}
+                value={v}
+                onChange={(val) =>
+                  setSettings({
+                    ...settings,
+                    privacy: { ...settings.privacy, [k]: val },
+                  })
+                }
+              />
+            ))}
+          </div>
         </Section>
 
         {/* ================= Save Button ================= */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-4">
           <button
             onClick={save}
-            className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 font-bold flex items-center gap-2 shadow-lg"
+            className="px-10 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black flex items-center gap-3 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all"
           >
-            <Save size={16} />
-            {saved ? "Saved ✓" : "Save Changes"}
+            <Save size={18} />
+            {saved ? "Changes Saved ✓" : "Save Settings"}
           </button>
         </div>
 
         {/* ================= Danger Zone ================= */}
         <Section icon={Trash2} title="Danger Zone">
           <div className="space-y-4">
-
             <SignOutButton>
-              <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 hover:bg-white/10">
-                <LogOut size={16} /> Sign Out
+              <button className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[var(--nav-hover-bg)] text-[var(--nav-text-active)] font-bold hover:bg-[var(--nav-hover-bg-heavy)] transition-all border border-[var(--border-muted)]">
+                <LogOut size={18} /> Sign Out
               </button>
             </SignOutButton>
 
             <button
-              onClick={() => alert("Hook this to delete API later")}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/20"
+              onClick={() => alert("Please contact support to delete account.")}
+              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 font-bold transition-all"
             >
-              <Trash2 size={16} /> Delete Account
+              <Trash2 size={18} /> Delete Account
             </button>
-
           </div>
         </Section>
-
       </div>
     </main>
   );

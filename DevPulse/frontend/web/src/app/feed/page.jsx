@@ -3,76 +3,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { Heart, MessageSquare, ArrowUp, ArrowDown, Clock, Star } from "lucide-react";
-
-/* ------------------------------
-   Demo users & stable images
-   (picsum.photos uses stable id endpoints)
-   ------------------------------ */
-
-const DEMO_USERS = [
-  { id: "u_alex", username: "alex", displayName: "Alex K", avatar: "https://picsum.photos/id/1005/200/200" },
-  { id: "u_sam", username: "sam", displayName: "Samira", avatar: "https://picsum.photos/id/1011/200/200" },
-  { id: "u_jordan", username: "jordan", displayName: "Jordan P", avatar: "https://picsum.photos/id/1027/200/200" },
-];
-
-/* stable post images (picsum id -> sized) */
-const DEMO_POSTS = [
-  {
-    id: "p1",
-    authorId: "u_alex",
-    title: "A tiny CSS animation library",
-    body: "Built a tiny CSS animation helper — 1.2KB gzipped. Works with tailwind utility classes and prefers reduced-motion.",
-    image: "https://picsum.photos/id/1015/1200/800",
-    tags: ["css", "animation", "ui"],
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
-    upvotes: 34,
-    downvotes: 2,
-    comments: [
-      { id: "c1", authorId: "u_sam", body: "Love the reduced-motion option — important!", createdAt: Date.now() - 1000 * 60 * 60 * 20 },
-    ],
-    voters: { up: ["u_sam"], down: [] },
-    stars: ["u_sam"], // who starred
-  },
-  {
-    id: "p2",
-    authorId: "u_sam",
-    title: "Realtime drawing board",
-    body: "A collaborative drawing board with WebRTC + CRDTs. Perf is surprisingly good on mobile.",
-    image: "https://picsum.photos/id/1033/1200/800",
-    tags: ["webrtc", "realtime", "collab"],
-    createdAt: Date.now() - 1000 * 60 * 60 * 8,
-    upvotes: 61,
-    downvotes: 3,
-    comments: [],
-    voters: { up: [], down: [] },
-    stars: [],
-  },
-  {
-    id: "p3",
-    authorId: "u_jordan",
-    title: "IndexedDB wrapper for caching large assets",
-    body: "A tiny wrapper that makes storing binary blobs in IndexedDB predictable across browsers.",
-    image: "https://picsum.photos/id/1041/1200/800",
-    tags: ["browser", "cache", "indexeddb"],
-    createdAt: Date.now() - 1000 * 60 * 60 * 48,
-    upvotes: 18,
-    downvotes: 0,
-    comments: [
-      { id: "c2", authorId: "u_alex", body: "Nice! code sample?", createdAt: Date.now() - 1000 * 60 * 60 * 47 },
-    ],
-    voters: { up: [], down: [] },
-    stars: ["u_alex"],
-  },
-];
+import { Heart, MessageSquare, ArrowUp, ArrowDown, Clock, Star, RefreshCw } from "lucide-react";
 
 /* ------------------------------
    Utilities
    ------------------------------ */
-
-function getDemoUserById(id) {
-  return DEMO_USERS.find((u) => u.id === id) || { id, username: id, displayName: id, avatar: "https://picsum.photos/seed/default/80/80" };
-}
 
 function prettyDate(ts) {
   const diff = Date.now() - ts;
@@ -85,16 +20,21 @@ function prettyDate(ts) {
 }
 
 /* ------------------------------
-   Small UI bits
+   Themed Atoms
    ------------------------------ */
 
-function VoteButton({ active, onClick, children, title }) {
+function VoteButton({ active, onClick, children, variant }) {
+  const activeClass = variant === "up" 
+    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30" 
+    : "bg-pink-600 text-white shadow-lg shadow-pink-500/30";
+
   return (
     <button
       onClick={onClick}
-      title={title}
-      className={`inline-flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-sm transition ${
-        active ? "bg-gradient-to-r from-indigo-600 to-pink-500 text-white shadow-md" : "bg-white/5 text-zinc-300 hover:bg-white/6"
+      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-all active:scale-95 ${
+        active 
+          ? activeClass 
+          : "bg-[var(--nav-hover-bg)] text-[var(--nav-text-muted)] hover:bg-[var(--nav-hover-bg-heavy)] hover:text-[var(--nav-text-active)] border border-[var(--border-muted)]"
       }`}
     >
       {children}
@@ -104,14 +44,14 @@ function VoteButton({ active, onClick, children, title }) {
 
 function Tag({ children }) {
   return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-600/30 to-purple-600/20 text-indigo-200 border border-white/6">
-      {children}
+    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+      #{children}
     </span>
   );
 }
 
 /* ------------------------------
-   Comments component
+   Comments Component
    ------------------------------ */
 
 function Comments({ comments = [], onAddComment, usersMap }) {
@@ -119,49 +59,40 @@ function Comments({ comments = [], onAddComment, usersMap }) {
   const [input, setInput] = useState("");
 
   return (
-    <div className="mt-3">
-      <button
-        onClick={() => setOpen((s) => !s)}
-        className="text-sm text-zinc-300 hover:text-white font-medium"
+    <div className="mt-4 border-t border-[var(--border-muted)] pt-4">
+      <button 
+        onClick={() => setOpen(!open)} 
+        className="text-sm font-bold text-[var(--nav-text-muted)] hover:text-indigo-500 transition-colors"
       >
-        {open ? "Hide comments" : `View comments (${comments.length})`}
+        {open ? "Hide Discussion" : `View Discussion (${comments.length})`}
       </button>
 
       {open && (
-        <div className="mt-3 space-y-3">
-          <div className="space-y-2 max-h-56 overflow-auto pr-2">
+        <div className="mt-4 space-y-4">
+          <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
             {comments.map((c) => {
-              const u = usersMap[c.authorId] || { displayName: "Unknown", avatar: "https://picsum.photos/seed/default/80/80" };
+              const u = usersMap[c.authorId] || { displayName: "Developer", avatar: "https://picsum.photos/seed/dev/80/80" };
               return (
-                <div key={c.id} className="flex gap-3">
-                  <img src={u.avatar} alt={u.displayName} className="w-8 h-8 rounded-full object-cover" />
-                  <div className="bg-white/4 rounded-xl p-3 flex-1">
-                    <div className="text-sm font-semibold text-white">
-                      {u.displayName}
-                      <span className="text-[11px] text-zinc-400 ml-2">{prettyDate(c.createdAt)}</span>
-                    </div>
-                    <div className="text-sm text-zinc-200 mt-1">{c.body}</div>
+                <div key={c.id} className="flex gap-3 animate-in fade-in slide-in-from-left-2">
+                  <img src={u.avatar} className="w-8 h-8 rounded-full border border-[var(--border-muted)] object-cover" alt="" />
+                  <div className="flex-1 bg-[var(--nav-hover-bg)] p-3 rounded-2xl border border-[var(--border-muted)]">
+                    <div className="text-xs font-black text-[var(--nav-text-active)] mb-1">{u.displayName}</div>
+                    <div className="text-sm text-[var(--nav-text-active)] opacity-80 leading-relaxed">{c.body}</div>
                   </div>
                 </div>
               );
             })}
           </div>
-
-          <div className="flex gap-2 items-center">
-            <input
-              value={input}
+          <div className="flex gap-2">
+            <input 
+              value={input} 
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Write a comment..."
-              className="flex-1 rounded-full px-4 py-2 bg-white/6 border border-white/8 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Add to the conversation..." 
+              className="flex-1 bg-[var(--nav-bg)] border border-[var(--border-color)] rounded-full px-5 py-2 text-sm text-[var(--nav-text-active)] outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             />
-            <button
-              onClick={() => {
-                const t = input.trim();
-                if (!t) return;
-                onAddComment(t);
-                setInput("");
-              }}
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold shadow-md"
+            <button 
+              onClick={() => { if(input.trim()) { onAddComment(input); setInput(""); } }}
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold text-sm shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
             >
               Reply
             </button>
@@ -173,7 +104,7 @@ function Comments({ comments = [], onAddComment, usersMap }) {
 }
 
 /* ------------------------------
-   PostCard
+   Post Card Component
    ------------------------------ */
 
 function PostCard({ post, author, onUpvote, onDownvote, onAddComment, onToggleStar, currentUserId, usersMap }) {
@@ -182,296 +113,265 @@ function PostCard({ post, author, onUpvote, onDownvote, onAddComment, onToggleSt
   const userStarred = (post.stars || []).includes(currentUserId);
 
   return (
-    <article className="rounded-2xl border border-white/6 overflow-hidden bg-gradient-to-br from-[#05040a] to-[#0b0410] shadow-xl hover:shadow-2xl transition">
-      <div className="p-5 flex gap-4">
-        <img src={author.avatar} alt={author.displayName} className="w-12 h-12 rounded-xl object-cover ring-1 ring-white/6" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3">
+    <article className="rounded-[2.5rem] border border-[var(--border-color)] overflow-hidden bg-[var(--card-bg)] backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500">
+      <div className="p-6 md:p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <img src={author.avatar} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-[var(--border-muted)] shadow-sm" alt="" />
             <div>
-              <Link href={`/u/${author.username}`} className="font-semibold text-white hover:underline">{author.displayName}</Link>
-              <div className="text-[12px] text-zinc-400 mt-1">
-                {prettyDate(post.createdAt)} • <span className="ml-1"><Tag>{post.tags.join(", ")}</Tag></span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-zinc-400">
-              <div className="flex items-center gap-2">
-                <ArrowUp className="w-4 h-4 text-indigo-300" /> <span className="font-bold text-white">{post.upvotes}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ArrowDown className="w-4 h-4 text-pink-300" /> <span className="font-bold text-white">{post.downvotes}</span>
+              <Link href={`/u/${author.username}`} className="font-black text-lg text-[var(--nav-text-active)] hover:text-indigo-500 transition-colors">
+                {author.displayName}
+              </Link>
+              <div className="text-xs font-bold text-[var(--nav-text-muted)] flex items-center gap-2">
+                {prettyDate(post.createdAt)} • <Tag>{post.tags[0]}</Tag>
               </div>
             </div>
           </div>
-
-          <h3 className="mt-3 text-lg font-extrabold text-white leading-tight">{post.title}</h3>
-          <p className="mt-2 text-sm text-zinc-300 leading-relaxed line-clamp-3">{post.body}</p>
-
-          {post.image && (
-            <div className="mt-4 rounded-xl overflow-hidden relative">
-              <img src={post.image} alt={post.title} className="w-full h-64 object-cover" loading="lazy" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-            </div>
-          )}
-
-          <div className="mt-4 flex items-center gap-3">
-            <VoteButton active={userUpvoted} onClick={() => onUpvote(post.id)} title="Upvote">
-              <ArrowUp className="w-4 h-4" /> Upvote
-            </VoteButton>
-
-            <VoteButton active={userDownvoted} onClick={() => onDownvote(post.id)} title="Downvote">
-              <ArrowDown className="w-4 h-4" /> Downvote
-            </VoteButton>
-
-            <button
-              onClick={() => {
-                const el = document.getElementById(`comments-${post.id}`);
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-              }}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-sm bg-white/5 text-zinc-300 hover:bg-white/6"
-            >
-              <MessageSquare className="w-4 h-4" /> Comment
-            </button>
-
-            <div className="ml-auto flex items-center gap-2">
-              <button
-                onClick={() => onToggleStar(post.id)}
-                className={`inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold transition ${
-                  userStarred ? "bg-gradient-to-r from-pink-500 to-indigo-500 text-white shadow-lg" : "bg-white/5 text-zinc-300 hover:bg-white/6"
-                }`}
-                aria-pressed={userStarred}
-                title={userStarred ? "Unstar" : "Star"}
-              >
-                <Heart className="w-4 h-4" />
-                <span>{(post.stars || []).length}</span>
-              </button>
-            </div>
-          </div>
-
-          <div id={`comments-${post.id}`} className="mt-4">
-            <Comments
-              comments={post.comments}
-              usersMap={usersMap}
-              onAddComment={(text) => onAddComment(post.id, text)}
-            />
+          <div className="flex items-center gap-4 text-xs font-black text-[var(--nav-text-active)] bg-[var(--nav-hover-bg)] px-4 py-2 rounded-2xl border border-[var(--border-muted)] shadow-inner">
+            <div className="flex items-center gap-1.5 text-indigo-500"><ArrowUp size={14}/> {post.upvotes}</div>
+            <div className="flex items-center gap-1.5 text-pink-500"><ArrowDown size={14}/> {post.downvotes}</div>
           </div>
         </div>
+
+        <h3 className="text-2xl font-black text-[var(--nav-text-active)] leading-tight mb-3 tracking-tight">{post.title}</h3>
+        <p className="text-[var(--nav-text-active)] opacity-70 leading-relaxed mb-6 font-medium text-base">{post.body}</p>
+
+        {post.image && (
+          <div className="rounded-3xl overflow-hidden border border-[var(--border-muted)] mb-6 shadow-sm">
+            <img src={post.image} className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" alt="" loading="lazy" />
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <VoteButton active={userUpvoted} variant="up" onClick={() => onUpvote(post.id)}>
+            <ArrowUp size={18}/> Upvote
+          </VoteButton>
+          <VoteButton active={userDownvoted} variant="down" onClick={() => onDownvote(post.id)}>
+            <ArrowDown size={18}/> Downvote
+          </VoteButton>
+          <button className="inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold text-sm bg-[var(--nav-hover-bg)] text-[var(--nav-text-muted)] hover:bg-[var(--nav-hover-bg-heavy)] hover:text-[var(--nav-text-active)] border border-[var(--border-muted)] transition-all">
+            <MessageSquare size={18}/> {post.comments.length}
+          </button>
+          <button 
+            onClick={() => onToggleStar(post.id)} 
+            className={`ml-auto p-3 rounded-full transition-all active:scale-90 ${userStarred ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/25' : 'bg-[var(--nav-hover-bg)] text-[var(--nav-text-muted)] border border-[var(--border-muted)]'}`}
+            title={userStarred ? "Unstar" : "Star"}
+          >
+            <Heart size={20} className={userStarred ? "fill-current" : ""} />
+          </button>
+        </div>
+
+        <Comments 
+          comments={post.comments} 
+          usersMap={usersMap} 
+          onAddComment={(t) => onAddComment(post.id, t)} 
+        />
       </div>
     </article>
   );
 }
 
 /* ------------------------------
-   Feed page (main)
+   Main Page
    ------------------------------ */
 
 export default function FeedPage() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const currentUserId = user?.id || "me_demo";
-
-  const [following] = useState(() => ["u_alex", "u_sam", "u_jordan"]);
-
-  // load persisted posts or DEMO_POSTS
-  const [posts, setPosts] = useState(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("devpulse_demo_posts_v3") : null;
-      if (raw) return JSON.parse(raw);
-    } catch {}
-    return DEMO_POSTS;
-  });
-
+  const [posts, setPosts] = useState([]);
   const [sort, setSort] = useState("new");
   const [visibleCount, setVisibleCount] = useState(5);
 
+  const DEMO_USERS = [
+    { id: "u_alex", username: "alex_dev", displayName: "Alex Rivera", avatar: "https://picsum.photos/id/1005/200/200" },
+    { id: "u_sarah", username: "sarah_codes", displayName: "Sarah Chen", avatar: "https://picsum.photos/id/1011/200/200" },
+    { id: "u_jordan", username: "jordan_stack", displayName: "Jordan Smith", avatar: "https://picsum.photos/id/1027/200/200" },
+    { id: "u_moto", username: "aurora_rider", displayName: "Mike Wheeler", avatar: "https://picsum.photos/id/1074/200/200" },
+  ];
+
+  const DEMO_POSTS = [
+    {
+      id: "p1",
+      authorId: "u_alex",
+      title: "Vibrant Light Mode is officially live! 🚀",
+      body: "I finally finished the CSS variable migration for DevPulse. The new slate-blue tint in light mode feels so much more premium than pure white. Check out the frosted glass effect on these cards!",
+      image: "https://images.unsplash.com/photo-1618477388954-7852f32655ec?auto=format&fit=crop&q=80&w=1000",
+      tags: ["ui-design", "frontend"],
+      createdAt: Date.now() - 1000 * 60 * 30,
+      upvotes: 84,
+      downvotes: 2,
+      comments: [{ id: "c1", authorId: "u_sarah", body: "The transitions are super smooth!", createdAt: Date.now() - 1000 * 60 * 10 }],
+      voters: { up: ["u_sarah"], down: [] },
+      stars: ["u_sarah"],
+    },
+    {
+      id: "p2",
+      authorId: "u_jordan",
+      title: "Automata Theory: NFA to Epsilon-NFA",
+      body: "Working on a Java-based visualizer for state machines. Mapping out the recursive epsilon closures was a nightmare, but seeing the transitions animate in real-time is worth it.",
+      image: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=1000",
+      tags: ["java", "cs-theory"],
+      createdAt: Date.now() - 1000 * 60 * 60 * 4,
+      upvotes: 126,
+      downvotes: 0,
+      comments: [],
+      voters: { up: [], down: [] },
+      stars: [],
+    },
+    {
+      id: "p3",
+      authorId: "u_moto",
+      title: "Meteor 350 Aurora Green - Clean Look",
+      body: "Added the custom leg guard to the Meteor 350 Aurora Green today. The way the light hits this green is insane. Shot some 4K wallpapers for the community.",
+      image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&q=80&w=1000",
+      tags: ["design", "moto"],
+      createdAt: Date.now() - 1000 * 60 * 60 * 24,
+      upvotes: 45,
+      downvotes: 1,
+      comments: [],
+      voters: { up: [], down: [] },
+      stars: [],
+    }
+  ];
+
   const usersMap = useMemo(() => {
     const map = {};
-    DEMO_USERS.forEach((u) => (map[u.id] = u));
+    DEMO_USERS.forEach(u => map[u.id] = u);
     return map;
   }, []);
 
-  // persist posts to localStorage whenever changed
+  // LOAD DATA
   useEffect(() => {
-    try {
-      localStorage.setItem("devpulse_demo_posts_v3", JSON.stringify(posts));
-    } catch {}
+    const raw = localStorage.getItem("devpulse_feed_v4");
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (!parsed || parsed.length === 0) {
+      setPosts(DEMO_POSTS);
+    } else {
+      setPosts(parsed);
+    }
+  }, []);
+
+  // PERSIST DATA
+  useEffect(() => {
+    if (posts.length > 0) {
+      localStorage.setItem("devpulse_feed_v4", JSON.stringify(posts));
+    }
   }, [posts]);
 
-  // vote star handlers update local state
-  function upvote(postId) {
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p;
-        const votersUp = new Set(p.voters?.up || []);
-        const votersDown = new Set(p.voters?.down || []);
-        const alreadyUp = votersUp.has(currentUserId);
-        const alreadyDown = votersDown.has(currentUserId);
-
-        if (alreadyUp) {
-          votersUp.delete(currentUserId);
-          return { ...p, upvotes: Math.max(0, p.upvotes - 1), voters: { up: Array.from(votersUp), down: Array.from(votersDown) } };
-        }
-
-        if (alreadyDown) {
-          votersDown.delete(currentUserId);
-          votersUp.add(currentUserId);
-          return {
-            ...p,
-            downvotes: Math.max(0, p.downvotes - 1),
-            upvotes: p.upvotes + 1,
-            voters: { up: Array.from(votersUp), down: Array.from(votersDown) },
-          };
-        }
-
-        votersUp.add(currentUserId);
-        return { ...p, upvotes: p.upvotes + 1, voters: { up: Array.from(votersUp), down: Array.from(votersDown) } };
-      })
-    );
+  // VOTING LOGIC (RESTORED & IMPROVED)
+  function handleUpvote(postId) {
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      const up = new Set(p.voters?.up || []);
+      const down = new Set(p.voters?.down || []);
+      if (up.has(currentUserId)) {
+        up.delete(currentUserId);
+        return { ...p, upvotes: Math.max(0, p.upvotes - 1), voters: { up: [...up], down: [...down] }};
+      }
+      if (down.has(currentUserId)) {
+        down.delete(currentUserId);
+        p.downvotes = Math.max(0, p.downvotes - 1);
+      }
+      up.add(currentUserId);
+      return { ...p, upvotes: p.upvotes + 1, voters: { up: [...up], down: [...down] }};
+    }));
   }
 
-  function downvote(postId) {
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p;
-        const votersUp = new Set(p.voters?.up || []);
-        const votersDown = new Set(p.voters?.down || []);
-        const alreadyDown = votersDown.has(currentUserId);
-        const alreadyUp = votersUp.has(currentUserId);
-
-        if (alreadyDown) {
-          votersDown.delete(currentUserId);
-          return { ...p, downvotes: Math.max(0, p.downvotes - 1), voters: { up: Array.from(votersUp), down: Array.from(votersDown) } };
-        }
-
-        if (alreadyUp) {
-          votersUp.delete(currentUserId);
-          votersDown.add(currentUserId);
-          return {
-            ...p,
-            upvotes: Math.max(0, p.upvotes - 1),
-            downvotes: p.downvotes + 1,
-            voters: { up: Array.from(votersUp), down: Array.from(votersDown) },
-          };
-        }
-
-        votersDown.add(currentUserId);
-        return { ...p, downvotes: p.downvotes + 1, voters: { up: Array.from(votersUp), down: Array.from(votersDown) } };
-      })
-    );
+  function handleDownvote(postId) {
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      const up = new Set(p.voters?.up || []);
+      const down = new Set(p.voters?.down || []);
+      if (down.has(currentUserId)) {
+        down.delete(currentUserId);
+        return { ...p, downvotes: Math.max(0, p.downvotes - 1), voters: { up: [...up], down: [...down] }};
+      }
+      if (up.has(currentUserId)) {
+        up.delete(currentUserId);
+        p.upvotes = Math.max(0, p.upvotes - 1);
+      }
+      down.add(currentUserId);
+      return { ...p, downvotes: p.downvotes + 1, voters: { up: [...up], down: [...down] }};
+    }));
   }
 
   function addComment(postId, text) {
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
-              comments: [
-                ...p.comments,
-                {
-                  id: `c_${Math.random().toString(36).slice(2, 9)}`,
-                  authorId: currentUserId,
-                  body: text,
-                  createdAt: Date.now(),
-                },
-              ],
-            }
-          : p
-      )
-    );
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, comments: [...p.comments, { id: Date.now(), authorId: currentUserId, body: text, createdAt: Date.now() }] } : p));
   }
 
   function toggleStar(postId) {
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p;
-        const s = new Set(p.stars || []);
-        if (s.has(currentUserId)) {
-          s.delete(currentUserId);
-        } else {
-          s.add(currentUserId);
-        }
-        return { ...p, stars: Array.from(s) };
-      })
-    );
+    setPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      const s = new Set(p.stars || []);
+      s.has(currentUserId) ? s.delete(currentUserId) : s.add(currentUserId);
+      return { ...p, stars: [...s] };
+    }));
   }
 
-  const feed = useMemo(() => {
-    const filtered = posts.filter((p) => following.includes(p.authorId));
-    if (sort === "new") return filtered.sort((a, b) => b.createdAt - a.createdAt);
-    return filtered.sort((a, b) => (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
-  }, [posts, following, sort]);
+  const sortedFeed = useMemo(() => {
+    return [...posts].sort((a, b) => sort === "new" ? b.createdAt - a.createdAt : (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes));
+  }, [posts, sort]);
 
-  const visiblePosts = feed.slice(0, visibleCount);
+  const handleReset = () => {
+    localStorage.removeItem("devpulse_feed_v4");
+    window.location.reload();
+  };
+
+  if (!isLoaded) return null;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#07040b] to-[#0f0410] text-white py-12">
-      <div className="max-w-5xl mx-auto px-4">
-        <header className="flex items-center justify-between mb-8">
+    <main className="min-h-screen bg-[var(--bg-body)] text-[var(--nav-text-active)] py-12 relative overflow-hidden transition-colors duration-300">
+      <div className="absolute inset-0 bg-[var(--hero-glow)] blur-[120px] opacity-20 pointer-events-none" />
+      
+      <div className="max-w-4xl mx-auto px-4 relative z-10">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-pink-400">
-              Your Feed
-            </h1>
-            <p className="text-sm text-zinc-400 mt-1">Latest posts from developers you follow</p>
+            <h1 className="text-5xl font-black tracking-tight text-[var(--nav-text-active)]">Community Feed</h1>
+            <p className="text-[var(--nav-text-muted)] font-bold mt-2">Latest builds and breakthroughs from the network</p>
           </div>
-
           <div className="flex items-center gap-3">
-            <div className="inline-flex items-center bg-white/5 rounded-full px-3 py-1 gap-2 text-sm">
-              <Clock className="w-4 h-4 text-zinc-300" />
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="bg-transparent outline-none text-sm"
-              >
-                <option value="new">Newest</option>
-                <option value="top">Top</option>
+            <div className="flex items-center bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl px-4 py-2 gap-2 shadow-sm">
+              <Clock className="w-4 h-4 text-indigo-500" />
+              <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-transparent outline-none text-sm font-black uppercase tracking-wider cursor-pointer">
+                <option value="new">Latest</option>
+                <option value="top">Trending</option>
               </select>
             </div>
-
-            <div className="inline-flex items-center bg-gradient-to-r from-indigo-700/20 to-pink-600/12 rounded-full px-3 py-1 gap-2 text-sm">
-              <Star className="w-4 h-4 text-indigo-300" />
-              <span className="text-sm text-zinc-200">Following: {following.length}</span>
-            </div>
+            <button 
+              onClick={handleReset} 
+              title="Reset Feed Data" 
+              className="p-3 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl text-[var(--nav-text-muted)] hover:text-indigo-500 transition-all active:rotate-180 duration-500 shadow-sm"
+            >
+              <RefreshCw size={18} />
+            </button>
           </div>
         </header>
 
-        <section className="space-y-6">
-          {visiblePosts.length === 0 ? (
-            <div className="text-center text-zinc-400 py-12 rounded-xl border border-white/6 bg-white/3">
-              No posts from people you follow yet. Try following some creators to fill your feed.
-            </div>
-          ) : (
-            visiblePosts.map((post) => {
-              const author = usersMap[post.authorId] || getDemoUserById(post.authorId);
-              return (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  author={author}
-                  onUpvote={upvote}
-                  onDownvote={downvote}
-                  onAddComment={addComment}
-                  onToggleStar={toggleStar}
-                  currentUserId={currentUserId}
-                  usersMap={{ ...usersMap, [currentUserId]: { id: currentUserId, username: user?.username || "you", displayName: user?.fullName || "You", avatar: user?.profileImageUrl || "https://picsum.photos/seed/me/80/80" } }}
-                />
-              );
-            })
-          )}
+        <section className="space-y-10">
+          {sortedFeed.slice(0, visibleCount).map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              author={usersMap[post.authorId] || { displayName: "Dev", avatar: "https://picsum.photos/seed/dev/80/80" }}
+              currentUserId={currentUserId}
+              onUpvote={handleUpvote}
+              onDownvote={handleDownvote}
+              onAddComment={addComment}
+              onToggleStar={toggleStar}
+              usersMap={{ ...usersMap, [currentUserId]: { displayName: user?.fullName || "You", avatar: user?.profileImageUrl || "/default-avatar.png" }}}
+            />
+          ))}
 
-          {visibleCount < feed.length && (
-            <div className="text-center">
-              <button
-                onClick={() => setVisibleCount((c) => c + 5)}
-                className="px-6 py-3 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold shadow-lg hover:scale-[1.02] transition-transform"
-              >
-                Load more
-              </button>
-            </div>
+          {visibleCount < sortedFeed.length && (
+             <div className="flex justify-center pt-8">
+                <button 
+                    onClick={() => setVisibleCount(c => c + 5)} 
+                    className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[1.5rem] font-black shadow-xl shadow-indigo-500/20 transition-all active:scale-95"
+                >
+                    Load More activity
+                </button>
+             </div>
           )}
-
-          <div className="pt-10 text-center text-xs text-zinc-500">
-            Demo feed — data stored locally. Will be replaced by your API + DB later.
-          </div>
         </section>
       </div>
     </main>

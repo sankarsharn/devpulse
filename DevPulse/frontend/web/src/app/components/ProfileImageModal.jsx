@@ -39,12 +39,7 @@ export default function ProfileImageModal({ open, onClose, user: externalUser })
     setMessage(null);
 
     try {
-      // Clerk provides frontend user.setProfileImage API:
-      // await user.setProfileImage({ file: fileObj })
-      // wrap in try/catch for errors
       await currentUser.setProfileImage({ file: fileObj });
-
-      // optionally reload the user to ensure UI shows updated image:
       await currentUser.reload?.();
 
       setMessage("Profile image updated!");
@@ -74,13 +69,13 @@ export default function ProfileImageModal({ open, onClose, user: externalUser })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-lg">
-      <div className="w-[420px] bg-zinc-900 border border-white/10 rounded-2xl p-6">
-        <h3 className="text-lg font-semibold mb-4">Update profile picture</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--modal-overlay)] backdrop-blur-lg">
+      <div className="w-[420px] bg-[var(--dropdown-bg)] border border-[var(--border-color)] rounded-2xl p-6 shadow-2xl">
+        <h3 className="text-lg font-semibold mb-4 text-[var(--nav-text-active)]">Update profile picture</h3>
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full overflow-hidden border border-white/8">
+            <div className="w-20 h-20 rounded-full overflow-hidden border border-[var(--border-muted)]">
               <img
                 src={filePreview || currentUser?.profileImageUrl || "/default-avatar.png"}
                 alt="preview"
@@ -89,23 +84,28 @@ export default function ProfileImageModal({ open, onClose, user: externalUser })
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 bg-white/5 rounded-md">
+              <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 bg-[var(--nav-hover-bg)] text-[var(--nav-text-active)] rounded-md border border-[var(--border-muted)] hover:bg-[var(--nav-hover-bg-heavy)] transition-colors">
                 Choose image
                 <input type="file" accept="image/*" onChange={onFileChange} className="hidden" />
               </label>
 
-              <button onClick={removeImage} className="text-sm text-red-400 hover:underline">Remove image</button>
+              <button onClick={removeImage} className="text-sm text-red-400 hover:underline w-fit">Remove image</button>
             </div>
           </div>
 
-          {message && <div className="text-sm text-zinc-300">{message}</div>}
+          {message && <div className="text-sm text-[var(--nav-text-muted)]">{message}</div>}
 
           <div className="flex justify-end gap-3 mt-4">
-            <button onClick={onClose} className="px-4 py-2 rounded-lg bg-white/10">Cancel</button>
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 rounded-lg bg-[var(--nav-hover-bg)] text-[var(--nav-text-active)] hover:bg-[var(--nav-hover-bg-heavy)] border border-[var(--border-muted)] transition-colors"
+            >
+              Cancel
+            </button>
             <button
               onClick={upload}
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-60"
+              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-60 shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
             >
               {loading ? "Uploading..." : "Save"}
             </button>
