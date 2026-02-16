@@ -18,7 +18,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function NavBar({ dbUser }) {
-  const { isLoaded } = useUser();
+  const { isLoaded,user: clerkUser } = useUser();
   const pathname = usePathname();
 
   const { isDarkMode, toggleTheme } = useTheme();
@@ -98,9 +98,9 @@ export default function NavBar({ dbUser }) {
     };
   }, []);
 
-  if (!isLoaded || !dbUser) return null;
+  if (!isLoaded) return null;
 
-  const avatarUrl = dbUser.avatar || "/default-avatar.png";
+  const avatarUrl = dbUser?.avatar || clerkUser?.imageUrl || "/default-avatar.png";
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
   const navItems = [
